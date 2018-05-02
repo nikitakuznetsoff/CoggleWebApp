@@ -38,13 +38,14 @@ def recursion_graph(node, passed_nodes, graph):
 
 
 # Алгоритм для экспортирования в таблицу матрицы
-def print_matrix(sheet, mass, length):
-    for i in range(2, length + 1):
+def print_matrix(sheet, mass):
+    for i in range(2, len(mass) + 2):
         sheet.cell(1, i, i - 1)
         sheet.cell(i, 1, i - 1)
-    for i in range(1, length):
-        for j in range(1, length):
-            sheet.cell(i + 1, j + 1, mass[i - 1][j - 1])
+
+    for i in range(0, len(mass)):
+        for j in range(0, len(mass[0])):
+            sheet.cell(i + 2, j + 2, mass[i][j])
 
 
 # Алгоритм для экспортирования в таблицу метрик
@@ -70,10 +71,15 @@ def create_graph_form_list(arr):
 # Чтение ИДшников референсных карт
 def read_mm_ids(sheet, point):
     arr = []
-    i = 1
-    while sheet[point + str(i)].value:
-        arr.append(link_to_id(sheet[point + str(i)].value))
-        i += 1
+    sost = True
+    for row in sheet.iter_rows():
+        if sost:
+            sost = False
+            continue
+        if row[1].value.strip():
+            arr.append(link_to_id(row[1].value.strip()))
+        else:
+            arr.append('')
     return arr
 
 
