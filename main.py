@@ -2,9 +2,9 @@ import json
 import requests
 from requests.auth import HTTPBasicAuth
 import webbrowser
-import analysis_function as af
-import substructure_algo as sub_algo
-import graph_function as gf
+from functions import analysis_function as af
+from functions import substructure_algo as sub_algo
+from functions import graph_function as gf
 import copy
 import flask
 from openpyxl import load_workbook
@@ -55,10 +55,7 @@ def upload_file():
         <input type=file name=file_input>
         <input type=submit value=Загрузить>
         <p>
-        <label for="file">Загрузка файла для выходных данных</label>
-        <p>
-        <input type=file name=file_output>
-        <input type=submit value=Загрузить>
+        <button>Скачать файл с результатами</button>
     </form>
     '''
 

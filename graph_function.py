@@ -1,6 +1,4 @@
 import networkx as nx
-import openpyxl.worksheet.dimensions
-
 
 # Группа методов для преобразования данных о вершинах в граф networkx
 # Начало алгоритма для списка деревьев
@@ -10,7 +8,7 @@ def transform_into_graph(node):
     for obj in node:
         passed_nodes.append(obj['_id'])
         graph.add_node(obj['_id'], text=obj['text'], offset=obj['offset'])
-        recursion_graph(obj, passed_nodes, graph)
+        transform_into_graph_rec(obj, passed_nodes, graph)
     return graph
 
 
@@ -19,11 +17,12 @@ def transform_into_graph_algo(node):
     passed_nodes = []
     graph = nx.DiGraph()
     graph.add_node(node['_id'], text=node['text'], offset=node['offset'])
-    recursion_graph(node, passed_nodes, graph)
+    transform_into_graph_rec(node, passed_nodes, graph)
     return graph
 
 
-def recursion_graph(node, passed_nodes, graph):
+# Метод предназначенный для рекурсивного использования
+def transform_into_graph_rec(node, passed_nodes, graph):
     if node['children']:
         for obj in node['children']:
             try:
@@ -33,7 +32,7 @@ def recursion_graph(node, passed_nodes, graph):
                 passed_nodes.append(obj['_id'])
                 graph.add_node(obj['_id'], text=obj['text'], offset=obj['offset'])
                 graph.add_edge(node['_id'], obj['_id'], color=obj['colour'])
-                recursion_graph(obj, passed_nodes, graph)
+                transform_into_graph_rec(obj, passed_nodes, graph)
     return graph
 
 
