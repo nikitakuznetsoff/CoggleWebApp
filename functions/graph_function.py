@@ -1,4 +1,9 @@
 import networkx as nx
+from openpyxl.styles import Font, Color
+from openpyxl.styles import colors
+from openpyxl import Workbook
+import  openpyxl
+
 
 # Группа методов для преобразования данных о вершинах в граф networkx
 # Начало алгоритма для списка деревьев
@@ -8,6 +13,7 @@ def transform_into_graph(node):
     for obj in node:
         passed_nodes.append(obj['_id'])
         graph.add_node(obj['_id'], text=obj['text'], offset=obj['offset'])
+        #graph.add_node(obj['_id'])
         transform_into_graph_rec(obj, passed_nodes, graph)
     return graph
 
@@ -38,9 +44,19 @@ def transform_into_graph_rec(node, passed_nodes, graph):
 
 # Алгоритм для экспортирования в таблицу матрицы
 def print_matrix(sheet, mass):
+    wb = Workbook()
+    ws = wb.active
     for i in range(2, len(mass) + 2):
         sheet.cell(1, i, i - 1)
+        curr_cell = ws[chr(66) + str(i)]
+        ft = Font(color=colors.RED)
+        curr_cell.font = ft
+
+    for i in range(2, len(mass[0]) + 2):
         sheet.cell(i, 1, i - 1)
+        curr_cell = ws[chr(i + 65) + str(1)]
+        ft = Font(color=colors.RED)
+        curr_cell.font = ft
 
     for i in range(0, len(mass)):
         for j in range(0, len(mass[0])):
@@ -68,17 +84,15 @@ def create_graph_form_list(arr):
 
 
 # Чтение ИДшников референсных карт
-def read_mm_ids(sheet, point):
+def read_mm_ids(sheet, point="B2"):
     arr = []
-    sost = True
-    for row in sheet.iter_rows():
-        if sost:
-            sost = False
-            continue
-        if row[1].value.strip():
-            arr.append(link_to_id(row[1].value.strip()))
+    column = ord(point[0]) - 65
+    str_row = point[1:]
+    for row in sheet.iter_rows(None, int(str_row), None, column):
+        if row[column].value:
+            arr.append(link_to_id(row[column].value.strip()))
         else:
-            arr.append('')
+            arr.append(None)
     return arr
 
 
@@ -86,4 +100,4 @@ def read_mm_ids(sheet, point):
 def link_to_id(link):
     first = link.find("/diagram/")
     last = link.find("/t/")
-    return link[first + 9 : last : 1]
+    return link[first + 9:last:1]

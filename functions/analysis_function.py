@@ -48,7 +48,7 @@ def images_count(nodes):
 def images_count_children(nodes):
     count = 0
     for obj in nodes['children']:
-        if obj['text'].find("![") != -1:
+        if obj['text'].find(r"!\[([a-zA-Z0-9 ]*)\]\(https?:") != -1:
             count += obj['text'].count("![") + images_count_children(obj)
     return count
 

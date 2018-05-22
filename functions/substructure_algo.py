@@ -1,8 +1,8 @@
 from networkx.algorithms import isomorphism
 from functions import analysis_function as af
-import  networkx as nx
 from functions import graph_function as gf
 import copy
+
 
 # Метод для удаления ненужных поддеревьев в заданном дереве
 def del_nodes(graph, obj_id, nodes):
@@ -13,6 +13,7 @@ def del_nodes(graph, obj_id, nodes):
             del_nodes_rec(graph, obj['_id'], arr)
     graph.remove_nodes_from(arr)
     return graph
+
 
 # Метод для рекурсивного вызова удаления вершин
 def del_nodes_rec(graph, n, arr):
