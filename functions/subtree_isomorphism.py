@@ -123,7 +123,7 @@ def max_common_substree_rooted(G, H):
             if max_isom_substree(g, h) == 0:
                 matrix[i].append(max_common_substree_algo_rec(G_graph, H_graph, G_node, H_node, G[0]['_id'], H[0]['_id']))
         i += 1
-    return max_mwm(matrix)
+    return af.similarity_sub_algo(max_mwm(matrix), G_graph, H_graph)
 
 
 def max_common_substree_algo_rec(G_graph, H_graph, nG_node, nH_node, root_G, root_H):
@@ -156,12 +156,10 @@ def max_common_substree_unrooted(G, H):
                 arr = []
                 i = 0
                 for u in G_graph.neighbors(node_G):
-                    ewq = list(G_graph.neighbors(node_G))
                     graph_form_root_G = make_graph(G_graph, node_G, u)
                     node_substree_G = subtree_by_node(G_graph, u)
                     arr.append([])
                     for v in H_graph.neighbors(node_H):
-                        qwe = list(H_graph.neighbors(node_H))
                         graph_form_root_H = make_graph(H_graph, node_H, v)
                         node_substree_H = subtree_by_node(H_graph, v)
                         summ = max_isom_substree(graph_form_root_G, graph_form_root_H) \

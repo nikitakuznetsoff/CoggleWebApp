@@ -46,13 +46,13 @@ def transform_into_graph_rec(node, passed_nodes, graph):
 def print_matrix(sheet, mass):
     wb = Workbook()
     ws = wb.active
-    for i in range(2, len(mass) + 2):
+    for i in range(2, len(mass[0]) + 2):
         sheet.cell(1, i, i - 1)
         curr_cell = ws[chr(66) + str(i)]
         ft = Font(color=colors.RED)
         curr_cell.font = ft
 
-    for i in range(2, len(mass[0]) + 2):
+    for i in range(2, len(mass) + 2):
         sheet.cell(i, 1, i - 1)
         curr_cell = ws[chr(i + 65) + str(1)]
         ft = Font(color=colors.RED)

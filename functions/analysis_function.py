@@ -94,5 +94,6 @@ def metrics(nodes, graph):
 
 
 # Подсчет меры сходства для подструктурного подхода
-def similarity_sub_algo(last_graph, graph_1, graph_2):
-    return (count_nodes(last_graph) * count_nodes(last_graph)) / (count_nodes(graph_1) * count_nodes(graph_2))
+def similarity_sub_algo(max_count, graph_1, graph_2):
+    max_count -= 1
+    return (max_count * max_count) / (count_nodes(graph_1) * count_nodes(graph_2))
