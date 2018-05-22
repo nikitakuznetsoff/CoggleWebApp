@@ -2,7 +2,6 @@ import json
 import requests
 from requests.auth import HTTPBasicAuth
 import webbrowser
-import copy
 import flask
 from openpyxl import load_workbook
 from flask import Flask, request, redirect, render_template
@@ -112,7 +111,7 @@ def upload_file():
 
 
 def take_mm(filename2, name2, cell2, status, filename1="", name1="", cell1=""):
-    wb = load_workbook(filename=filename2)
+    wb = load_workbook(filename2)
     if name2 != "":
         sheet = wb[name2]
     else:
@@ -129,7 +128,7 @@ def take_mm(filename2, name2, cell2, status, filename1="", name1="", cell1=""):
         if name1 != "":
             sheet_1 = wb_first[name1]
         else:
-            sheet_1 = wb_first[wb.sheetnames[0]]
+            sheet_1 = wb_first[wb_first.sheetnames[0]]
 
         if cell2 == "":
             arr_ids_first = gf.read_mm_ids(sheet_1)
@@ -160,58 +159,7 @@ def take_mm(filename2, name2, cell2, status, filename1="", name1="", cell1=""):
         output_sheet = wb.create_sheet('results')
         gf.print_matrix(output_sheet, mass)
         wb.save(filename2)
-    '''
-    id_diagram_1 = sheet['A1'].value
-    id_diagram_2 = sheet['A2'].value
-    if not status:
-        arr = []
-        arr.append(information_for_algo(id_diagram_1))
-        arr.append(information_for_algo(id_diagram_2))
 
-        #arr_ids = gf.read_mm_ids(sheet, "B")
-        n = len(arr_ids)
-        mass = [[0] * 2 for i in range(n)]
-        for i in range(0, len(arr_ids)):
-            for j in range(0, 2):
-                curr_map = information_for_algo(arr_ids[i])
-                mass[i][j] = si.max_common_substree_rooted(arr[j]['diagram'], curr_map['diagram'])
-                
-                curr_map = information_for_algo(arr_ids[i])
-                new_graph = copy.deepcopy(arr[j]['graph'])
-                algo = sub_algo.max_comp_element(arr[j]['diagram'], new_graph, curr_map['graph'])
-                last_graph = gf.create_graph_form_list(algo)
-                mass[i][j] = af.similarity_sub_algo(last_graph, arr[j]['graph'], curr_map['graph'])
-                shod = si.max_common_substree_rooted(arr[0]['diagram'], arr[1]['diagram'])
- 
-        output_sheet = wb.create_sheet('matrix')
-        gf.print_matrix(output_sheet, mass)
-        wb.save(filename2)
-        new_graph = copy.deepcopy(arr[0]['graph'])
-        algo = sub_algo.max_comp_element(arr[0]['diagram'], new_graph, arr[1]['graph'])
-        last_graph = gf.create_graph_form_list(algo)
-        qweqwe = af.similarity_sub_algo(last_graph, arr[0]['graph'], arr[1]['graph'])
-        
-    else:
-        arr_ids = gf.read_mm_ids(sheet, "B")
-        n = len(arr_ids)
-        mass = [[0] * n for i in range(n)]
-        for i in range(0, len(arr_ids)):
-            for j in range(0, len(arr_ids)):
-                mind_map_1 = coggle_user.diagram(arr_ids[i])
-                mind_map_2 = coggle_user.diagram(arr_ids[j])
-                mass[i][j] = si.max_common_substree_rooted(mind_map_1, mind_map_2)
-                
-                mind_map_1 = information_for_algo(arr_ids[i])
-                mind_map_2 = information_for_algo(arr_ids[j])
-                new_graph_1 = copy.deepcopy(mind_map_1['graph'])
-                algo = sub_algo.max_comp_element(mind_map_1['diagram'], new_graph_1, mind_map_2['graph'])
-                last_graph = gf.create_graph_form_list(algo)
-                mass[i][j] = af.similarity_sub_algo(last_graph, mind_map_1['graph'], mind_map_2['graph'])
-               
-        output_sheet = wb.create_sheet('matrix')
-        gf.print_matrix(output_sheet, mass)
-        wb.save(filename)
-'''
 
 # Проверка на наличие конкретной таблицы в файле
 def check_correct_tablename(wb, name):
@@ -248,6 +196,7 @@ def create_arr_diagrams(arr):
     for obj in arr:
         new_arr.append(create_diagram(obj))
     return new_arr
+
 
 def information_for_algo(id_diagram):
     arr = {'diagram': '', 'graph': ''}
