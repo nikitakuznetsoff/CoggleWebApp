@@ -12,76 +12,185 @@ from functions import substructure_algo as sub_algo
 from functions import graph_function as gf
 from functions import subtree_isomorphism as si
 
-
 app = Flask(__name__)
 app.secret_key = 'some_secret'
+
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     if coggle_user.access_token == "":
         coggle_user.authorization_token()
     if request.method == 'POST':
-        if 'file_input' not in request.files:
-            flask.flash('No file part', 'input')
-            return redirect(request.url)
-
-        file = request.files['file_input']
-        #file_ref = request.files['files_input_ref']
         form = request.form['form_algo']
-
-        if file.filename == '':
-            flask.flash('No selected file', 'input')
+        '''
+        if 'file_input' not in request.files:
+            flask.flash('Вы не загрузили файл', 'input')
             return redirect(request.url)
-        #if file_ref.filename == '':
-        #    flask.flash('Вы не выбрали файл!', 'input_ref')
-        #    return redirect(request.url)
+        '''
+        # Проверки загруки нужнных файлов
+        if (form == "with_true") and (('file_input' not in request.files) or ('file_input_ref' not in request.files)):
+            if 'file_input' not in request.files:
+                flask.flash('Ошибка! Вы не загрузили файл', 'input')
+            if 'file_input_ref' not in request.files:
+                flask.flash('Ошибка! Вы не загрузили файл', 'input_ref')
+            return redirect(request.url)
 
-        if file:
+        if (form == "without_true") and ('file_input_ref' not in request.files):
+            flask.flash('Ошибка! Вы не загрузили файл', 'input_ref')
+            return redirect(request.url)
+
+        # Делаем запросы для получения информации о файлах
+        if form == "with_true":
+            file = request.files['file_input']
+        file_ref = request.files['file_input_ref']
+
+        # Еще одни проверки на наличие файла
+        if form == "with_true":
+            if file.filename == '':
+                flask.flash('Ошибка! Вы не выбрали файл!', 'input')
+                return redirect(request.url)
+        if file_ref.filename == '':
+            flask.flash('Ошибка! Вы не выбрали файл!', 'input_ref')
+            return redirect(request.url)
+
+
+        # Считываем названия файлов
+        filename_file = ""
+        if form == "with_true":
             filename_file = secure_filename(file.filename)
             file.save(filename_file)
-            if form == "without_ref":
-                take_mm(filename_file)
-            elif form == "with_ref":
-                take_mm(filename_file, True)
-            return redirect(request.url)
+        filename_file_ref = secure_filename(file_ref.filename)
+        file_ref.save(filename_file_ref)
+
+        # Считываем данных о названий таблиц
+        inf_for_read1 = request.form['inf_for_read1']
+        inf_for_read2 = request.form['inf_for_read2']
+
+        # Проверки названий таблиц
+        if form == "with_true":
+            if inf_for_read1 != "":
+                wb = load_workbook(filename=filename_file)
+                if not check_correct_tablename(wb, inf_for_read1):
+                    flask.flash('Ошибка! В файле нет таблицы с таким названием!', 'inf_for_read1')
+                    return redirect(request.url)
+            if inf_for_read2 != "":
+                wb = load_workbook(filename=filename_file_ref)
+                if not check_correct_tablename(wb, inf_for_read2):
+                    flask.flash('Ошибка! В файле нет таблицы с таким названием!', 'inf_for_read2')
+                    return redirect(request.url)
+        else:
+            if inf_for_read2 != "":
+                wb = load_workbook(filename=filename_file_ref)
+                if not check_correct_tablename(wb, inf_for_read2):
+                    flask.flash('Ошибка! В файле нет таблицы с таким названием!', 'inf_for_read2')
+                    return redirect(request.url)
+
+        # Считываем значения ячеек
+        cell_for_read1 = request.form['cell_for_read1']
+        cell_for_read2 = request.form['cell_for_read2']
+
+        # Проверки на форматы ячеек
+        if form == "with_true":
+            if (len(cell_for_read1) > 4 or len(cell_for_read2) > 4) or (not check_correct_cellname(cell_for_read1)) or (not check_correct_cellname(cell_for_read2)):
+                if (not check_correct_cellname(cell_for_read1)) or len(cell_for_read1) > 4:
+                    flask.flash('Ошибка! Вы ввели ячеку некорректного формата!', 'cell_for_read1')
+                if (not check_correct_cellname(cell_for_read2)) or len(cell_for_read2) > 4:
+                    flask.flash('Ошибка! Вы ввели ячеку некорректного формата!', 'cell_for_read2')
+                return redirect(request.url)
+        else:
+            if (not check_correct_cellname(cell_for_read2)) or len(cell_for_read2) > 4:
+                flask.flash('Ошибка! Вы ввели ячеку некорректного формата!', 'cell_for_read2')
+                return redirect(request.url)
+
+        if form == "with_true":
+            status = True
+            take_mm(filename_file_ref, inf_for_read2, cell_for_read2, status, filename_file, inf_for_read1, cell_for_read1)
+        else:
+            status = False
+            take_mm(filename_file_ref, inf_for_read2, cell_for_read2, status)
     return render_template('index.html')
 
 
-def take_mm(filename, status = None):
-    wb = load_workbook(filename=filename)
-    sheet = wb[wb.sheetnames[0]]
+def take_mm(filename2, name2, cell2, status, filename1="", name1="", cell1=""):
+    wb = load_workbook(filename=filename2)
+    if name2 != "":
+        sheet = wb[name2]
+    else:
+        sheet = wb[wb.sheetnames[0]]
+
+    if cell2 == "":
+        arr_ids = gf.read_mm_ids(sheet)
+    else:
+        arr_ids = gf.read_mm_ids(sheet, cell2)
+    arr_diagrams = create_arr_diagrams(arr_ids)
+
+    if status:
+        wb_first = load_workbook(filename1)
+        if name1 != "":
+            sheet_1 = wb_first[name1]
+        else:
+            sheet_1 = wb_first[wb.sheetnames[0]]
+
+        if cell2 == "":
+            arr_ids_first = gf.read_mm_ids(sheet_1)
+        else:
+            arr_ids_first = gf.read_mm_ids(sheet_1, cell1)
+        arr_diagrams_first = create_arr_diagrams(arr_ids_first)
+
+        mass = [[0] * len(arr_diagrams) for i in range(len(arr_diagrams_first))]
+        for i in range(len(arr_diagrams_first)):
+            for j in range(len(arr_diagrams)):
+                if (arr_diagrams_first[i] == None) or (arr_diagrams[j] == None):
+                    mass[i][j] = None
+                else:
+                    mass[i][j] = si.max_common_substree_rooted(arr_diagrams_first[i], arr_diagrams[j])
+        ###
+        output_sheet = wb.create_sheet('results')
+        gf.print_matrix(output_sheet, mass)
+        wb.save(filename2)
+    else:
+        mass = [[0] * len(arr_diagrams) for i in range(len(arr_diagrams))]
+        for i in range(len(arr_diagrams)):
+            for j in range(len(arr_diagrams)):
+                if (arr_diagrams[i] == None) or (arr_diagrams[j] == None):
+                    mass[i][j] = None
+                else:
+                    mass[i][j] = si.max_common_substree_rooted(arr_diagrams[i], arr_diagrams[j])
+        ###
+        output_sheet = wb.create_sheet('results')
+        gf.print_matrix(output_sheet, mass)
+        wb.save(filename2)
+    '''
     id_diagram_1 = sheet['A1'].value
     id_diagram_2 = sheet['A2'].value
-    if status is None:
+    if not status:
         arr = []
         arr.append(information_for_algo(id_diagram_1))
         arr.append(information_for_algo(id_diagram_2))
 
-        arr_ids = gf.read_mm_ids(sheet, "B")
+        #arr_ids = gf.read_mm_ids(sheet, "B")
         n = len(arr_ids)
         mass = [[0] * 2 for i in range(n)]
         for i in range(0, len(arr_ids)):
             for j in range(0, 2):
                 curr_map = information_for_algo(arr_ids[i])
                 mass[i][j] = si.max_common_substree_rooted(arr[j]['diagram'], curr_map['diagram'])
-                '''
+                
                 curr_map = information_for_algo(arr_ids[i])
                 new_graph = copy.deepcopy(arr[j]['graph'])
                 algo = sub_algo.max_comp_element(arr[j]['diagram'], new_graph, curr_map['graph'])
                 last_graph = gf.create_graph_form_list(algo)
                 mass[i][j] = af.similarity_sub_algo(last_graph, arr[j]['graph'], curr_map['graph'])
-                '''
-        shod = si.max_common_substree_rooted(arr[0]['diagram'], arr[1]['diagram'])
+                shod = si.max_common_substree_rooted(arr[0]['diagram'], arr[1]['diagram'])
+ 
         output_sheet = wb.create_sheet('matrix')
         gf.print_matrix(output_sheet, mass)
-        wb.save(filename)
-        '''
+        wb.save(filename2)
         new_graph = copy.deepcopy(arr[0]['graph'])
         algo = sub_algo.max_comp_element(arr[0]['diagram'], new_graph, arr[1]['graph'])
         last_graph = gf.create_graph_form_list(algo)
         qweqwe = af.similarity_sub_algo(last_graph, arr[0]['graph'], arr[1]['graph'])
-        '''
-
+        
     else:
         arr_ids = gf.read_mm_ids(sheet, "B")
         n = len(arr_ids)
@@ -91,33 +200,54 @@ def take_mm(filename, status = None):
                 mind_map_1 = coggle_user.diagram(arr_ids[i])
                 mind_map_2 = coggle_user.diagram(arr_ids[j])
                 mass[i][j] = si.max_common_substree_rooted(mind_map_1, mind_map_2)
-                '''
+                
                 mind_map_1 = information_for_algo(arr_ids[i])
                 mind_map_2 = information_for_algo(arr_ids[j])
                 new_graph_1 = copy.deepcopy(mind_map_1['graph'])
                 algo = sub_algo.max_comp_element(mind_map_1['diagram'], new_graph_1, mind_map_2['graph'])
                 last_graph = gf.create_graph_form_list(algo)
                 mass[i][j] = af.similarity_sub_algo(last_graph, mind_map_1['graph'], mind_map_2['graph'])
-                '''
+               
         output_sheet = wb.create_sheet('matrix')
         gf.print_matrix(output_sheet, mass)
         wb.save(filename)
 '''
-# mind_map_1 = information_for_algo(id_diagram_1)
-        # mind_map_2 = information_for_algo(id_diagram_2)
-        new_graph_1 = copy.deepcopy(mind_map_1['graph'])
 
-        algo = sub_algo.max_comp_element(mind_map_1['diagram'], new_graph_1, mind_map_2['graph'])
-        last_graph = gf.create_graph_form_list(algo)
-        procent = af.similarity_sub_algo(last_graph, mind_map_1['graph'], mind_map_2['graph'])
+# Проверка на наличие конкретной таблицы в файле
+def check_correct_tablename(wb, name):
+    arr = wb.sheetnames
+    try:
+        if arr.index(name) != -1:
+            return True
+    except Exception:
+        return False
 
-        output_sheet = wb.create_sheet('output')
-        output_sheet['A1'] = "Мера сходства"
-        output_sheet['A2'] = procent
-        gf.print_metrics(output_sheet, af.metrics(mind_map_1['diagram'], mind_map_1['graph']), af.metrics(mind_map_2['diagram'], mind_map_2['graph']))
-        wb.save(filename)
-'''
 
+# Проверка на кооректный формат ячейки для начала считывания
+def check_correct_cellname(name):
+    if name[0].isupper() and name[1:].isdigit():
+        return True
+    return False
+
+
+# Создание диаграммы из ID и проверка закрыта / открыта карта
+def create_diagram(id):
+    if id is None:
+        return None
+    diag = coggle_user.nodes(id)
+    for obj in diag:
+        if obj == 'error':
+            return None
+        break
+    return diag
+
+
+# Создание массива диаграмм из массива айдишников
+def create_arr_diagrams(arr):
+    new_arr = []
+    for obj in arr:
+        new_arr.append(create_diagram(obj))
+    return new_arr
 
 def information_for_algo(id_diagram):
     arr = {'diagram': '', 'graph': ''}
