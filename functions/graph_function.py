@@ -1,7 +1,5 @@
 import networkx as nx
-from openpyxl.styles import Font, Color
-from openpyxl.styles import colors
-from openpyxl import Workbook
+from openpyxl.styles import PatternFill
 import  openpyxl
 
 
@@ -44,23 +42,22 @@ def transform_into_graph_rec(node, passed_nodes, graph):
 
 # Алгоритм для экспортирования в таблицу матрицы
 def print_matrix(sheet, mass):
-    wb = Workbook()
+    wb = openpyxl.Workbook()
     ws = wb.active
-    for i in range(2, len(mass[0]) + 2):
-        sheet.cell(1, i, i - 1)
-        curr_cell = ws[chr(66) + str(i)]
-        ft = Font(color=colors.RED)
-        curr_cell.font = ft
 
-    for i in range(2, len(mass) + 2):
-        sheet.cell(i, 1, i - 1)
-        curr_cell = ws[chr(i + 65) + str(1)]
-        ft = Font(color=colors.RED)
-        curr_cell.font = ft
+    if len(mass) == 0:
+        sheet.cell(1, 1, "Проблема с входными данными")
+    else:
+        for i in range(2, len(mass[0]) + 2):
+            sheet.cell(1, i, i - 1)
 
-    for i in range(0, len(mass)):
-        for j in range(0, len(mass[0])):
-            sheet.cell(i + 2, j + 2, mass[i][j])
+        for i in range(2, len(mass) + 2):
+            sheet.cell(i, 1, i - 1)
+
+        for i in range(0, len(mass)):
+            for j in range(0, len(mass[0])):
+                sheet.cell(i + 2, j + 2, mass[i][j])
+
 
 
 # Алгоритм для экспортирования в таблицу метрик
@@ -88,11 +85,16 @@ def read_mm_ids(sheet, point="B2"):
     arr = []
     column = ord(point[0]) - 65
     str_row = point[1:]
+
     for row in sheet.iter_rows(None, int(str_row), None, column):
-        if row[column].value:
-            arr.append(link_to_id(row[column].value.strip()))
-        else:
-            arr.append(None)
+        try:
+            qwe = row[column].value
+            if row[column].value:
+                arr.append(link_to_id(row[column].value.strip()))
+            else:
+                arr.append(None)
+        except Exception:
+            return arr
     return arr
 
 

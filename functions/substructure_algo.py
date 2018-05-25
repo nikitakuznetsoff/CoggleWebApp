@@ -42,6 +42,7 @@ def max_comp_element(nodes, graph, comp_graph):
     return max_arr
 
 
+# Рекурсивная часть алгоритма
 def max_comp_element_alg(nodes, graph, comp_graph, max_arr):
     em = isomorphism.categorical_edge_match('colour', '')
     nm = isomorphism.categorical_node_match('text', '')

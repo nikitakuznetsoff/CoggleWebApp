@@ -95,6 +95,7 @@ def max_mwm(arr):
     return max(arr_summ)
 
 
+# Рекурсивная часть алгоритма
 def max_mwm_rec(arr, nodes, ni, nj, sum, arr_summ):
     nodes[nj] = True
     for i in range(ni + 1, len(arr)):
@@ -105,7 +106,7 @@ def max_mwm_rec(arr, nodes, ni, nj, sum, arr_summ):
     arr_summ.append(sum)
 
 
-# Алгоритм для напралвенных деревьев
+# Алгоритм для направленных деревьев
 def max_common_substree_rooted(G, H):
     G_graph = gf.transform_into_graph(G)
     H_graph = gf.transform_into_graph(H)
@@ -121,18 +122,19 @@ def max_common_substree_rooted(G, H):
             if max_isom_substree(g, h) == af.count_nodes(h):
                 matrix[i].append(af.count_nodes(h))
             if max_isom_substree(g, h) == 0:
-                matrix[i].append(max_common_substree_algo_rec(G_graph, H_graph, G_node, H_node, G[0]['_id'], H[0]['_id']))
+                matrix[i].append(max_common_substree_rooted_rec(G_graph, H_graph, G_node, H_node, G[0]['_id'], H[0]['_id']))
         i += 1
     return af.similarity_sub_algo(max_mwm(matrix), G_graph, H_graph)
 
 
-def max_common_substree_algo_rec(G_graph, H_graph, nG_node, nH_node, root_G, root_H):
+# Рекурсивная часть алгоритма
+def max_common_substree_rooted_rec(G_graph, H_graph, nG_node, nH_node, root_G, root_H):
     matrix = []
     i = 0
     for G_node in G_graph.neighbors(nG_node):
         matrix.append([])
         for H_node in H_graph.neighbors(nH_node):
-            matrix[i].append(max_common_substree_algo_rec(G_graph, H_graph, G_node, H_node, root_G, root_H))
+            matrix[i].append(max_common_substree_rooted_rec(G_graph, H_graph, G_node, H_node, root_G, root_H))
         i += 1
     root_to_GNode = make_graph(G_graph, root_G, nG_node)
     root_to_HNode = make_graph(H_graph, root_H, nH_node)
