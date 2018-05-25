@@ -21,11 +21,7 @@ def upload_file():
         coggle_user.authorization_token()
     if request.method == 'POST':
         form = request.form['form_algo']
-        '''
-        if 'file_input' not in request.files:
-            flask.flash('Вы не загрузили файл', 'input')
-            return redirect(request.url)
-        '''
+
         # Проверки загруки нужнных файлов
         if (form == "with_true") and (('file_input' not in request.files) or ('file_input_ref' not in request.files)):
             if 'file_input' not in request.files:
@@ -90,17 +86,19 @@ def upload_file():
 
         # Проверки на форматы ячеек
         if form == "with_true":
-            if (len(cell_for_read1) > 4 or len(cell_for_read2) > 4) or (not check_correct_cellname(cell_for_read1)) or (not check_correct_cellname(cell_for_read2)):
-                if (not check_correct_cellname(cell_for_read1)) or len(cell_for_read1) > 4:
-                    flask.flash('Ошибка! Вы ввели ячеку некорректного формата!', 'cell_for_read1')
-                if (not check_correct_cellname(cell_for_read2)) or len(cell_for_read2) > 4:
-                    flask.flash('Ошибка! Вы ввели ячеку некорректного формата!', 'cell_for_read2')
-                return redirect(request.url)
+            if (cell_for_read1 != '') or (cell_for_read2 != ''):
+                if (len(cell_for_read1) > 4 or len(cell_for_read2) > 4) or (not check_correct_cellname(cell_for_read1)) or (not check_correct_cellname(cell_for_read2)):
+                    if (not check_correct_cellname(cell_for_read1)) or len(cell_for_read1) > 4:
+                        flask.flash('Ошибка! Вы ввели ячеку некорректного формата!', 'cell_for_read1')
+                    if (not check_correct_cellname(cell_for_read2)) or len(cell_for_read2) > 4:
+                        flask.flash('Ошибка! Вы ввели ячеку некорректного формата!', 'cell_for_read2')
+                    return redirect(request.url)
         else:
             if (not check_correct_cellname(cell_for_read2)) or len(cell_for_read2) > 4:
                 flask.flash('Ошибка! Вы ввели ячеку некорректного формата!', 'cell_for_read2')
                 return redirect(request.url)
 
+        # Вызов метода, в котором вычисляются меры сходства и выводится информация
         if form == "with_true":
             status = True
             take_mm(filename_file_ref, inf_for_read2, cell_for_read2, status, filename_file, inf_for_read1, cell_for_read1)
@@ -112,12 +110,12 @@ def upload_file():
 
 def take_mm(filename2, name2, cell2, status, filename1="", name1="", cell1=""):
     wb = load_workbook(filename2)
-    if name2 != "":
+    if name2 != '':
         sheet = wb[name2]
     else:
         sheet = wb[wb.sheetnames[0]]
 
-    if cell2 == "":
+    if cell2 == '':
         arr_ids = gf.read_mm_ids(sheet)
     else:
         arr_ids = gf.read_mm_ids(sheet, cell2)
@@ -125,12 +123,12 @@ def take_mm(filename2, name2, cell2, status, filename1="", name1="", cell1=""):
 
     if status:
         wb_first = load_workbook(filename1)
-        if name1 != "":
+        if name1 != '':
             sheet_1 = wb_first[name1]
         else:
             sheet_1 = wb_first[wb_first.sheetnames[0]]
 
-        if cell2 == "":
+        if cell1 == '':
             arr_ids_first = gf.read_mm_ids(sheet_1)
         else:
             arr_ids_first = gf.read_mm_ids(sheet_1, cell1)
@@ -173,6 +171,7 @@ def check_correct_tablename(wb, name):
 
 # Проверка на кооректный формат ячейки для начала считывания
 def check_correct_cellname(name):
+    if name == "": return True
     if name[0].isupper() and name[1:].isdigit():
         return True
     return False
