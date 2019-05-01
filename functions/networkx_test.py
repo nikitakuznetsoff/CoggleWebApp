@@ -1,13 +1,37 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 from networkx.algorithms import isomorphism
+from networkx.algorithms import bipartite
+
+B = nx.Graph()
+B.add_nodes_from([1,2], bipartite=0)
+B.add_nodes_from(['a','b','c'], bipartite=1)
+B.add_edges_from([(1,'a'), (1,'b'), (2,'b'), (2,'a'), (2, 'c')])
+B[1]['a']['weight'] = 2
+B[1]['b']['weight'] = 2
+B[2]['a']['weight'] = 2
+B[2]['b']['weight'] = 2
+B[2]['c']['weight'] = 2
+
+print(nx.maximum_flow_value(B, 1, 'a', capacity='weight'))
+flow_value, flow_dict = nx.maximum_flow(B, 1, 'c', capacity='weight')
+
+
 
 Graph = nx.DiGraph()
 Graph.add_nodes_from([1, 2, 3, 4])
-Graph.add_edges_from([(1, 2), (1, 3), (4, 1)])
+Graph.add_edge(1, 2, weight=2)
+Graph.add_edge(2, 3)
+Graph[2][3]['weight'] = Graph[1][2]['weight']
+
+
+
 print(list(Graph.neighbors(1)))
 print(list(Graph.successors(1)))
 print("...")
+#print(nx.shortest_path(Graph, source=4, target=3))
+#qweqwe = nx.DiGraph()
+#qweqwe.add_nodes_from(nx.shortest_path(Graph, source=4, target=3))
 
 G = nx.Graph()
 # Вершины

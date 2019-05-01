@@ -1,5 +1,7 @@
 import networkx as nx
-from openpyxl.styles import PatternFill
+from openpyxl.styles import Font, Color
+from openpyxl.styles import colors
+from openpyxl import Workbook
 import  openpyxl
 
 
@@ -42,9 +44,6 @@ def transform_into_graph_rec(node, passed_nodes, graph):
 
 # Алгоритм для экспортирования в таблицу матрицы
 def print_matrix(sheet, mass):
-    wb = openpyxl.Workbook()
-    ws = wb.active
-
     if len(mass) == 0:
         sheet.cell(1, 1, "Проблема с входными данными")
     else:
@@ -57,7 +56,6 @@ def print_matrix(sheet, mass):
         for i in range(0, len(mass)):
             for j in range(0, len(mass[0])):
                 sheet.cell(i + 2, j + 2, mass[i][j])
-
 
 
 # Алгоритм для экспортирования в таблицу метрик
@@ -88,7 +86,6 @@ def read_mm_ids(sheet, point="B2"):
 
     for row in sheet.iter_rows(None, int(str_row), None, column):
         try:
-            qwe = row[column].value
             if row[column].value:
                 arr.append(link_to_id(row[column].value.strip()))
             else:

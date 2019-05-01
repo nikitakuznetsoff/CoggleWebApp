@@ -21,7 +21,11 @@ def upload_file():
         coggle_user.authorization_token()
     if request.method == 'POST':
         form = request.form['form_algo']
-
+        '''
+        if 'file_input' not in request.files:
+            flask.flash('Вы не загрузили файл', 'input')
+            return redirect(request.url)
+        '''
         # Проверки загруки нужнных файлов
         if (form == "with_true") and (('file_input' not in request.files) or ('file_input_ref' not in request.files)):
             if 'file_input' not in request.files:
@@ -97,6 +101,7 @@ def upload_file():
             if (not check_correct_cellname(cell_for_read2)) or len(cell_for_read2) > 4:
                 flask.flash('Ошибка! Вы ввели ячеку некорректного формата!', 'cell_for_read2')
                 return redirect(request.url)
+        #
 
         # Вызов метода, в котором вычисляются меры сходства и выводится информация
         if form == "with_true":
@@ -128,10 +133,10 @@ def take_mm(filename2, name2, cell2, status, filename1="", name1="", cell1=""):
         else:
             sheet_1 = wb_first[wb_first.sheetnames[0]]
 
-        if cell1 == '':
+        if cell2 == '':
             arr_ids_first = gf.read_mm_ids(sheet_1)
         else:
-            arr_ids_first = gf.read_mm_ids(sheet_1, cell1)
+            arr_ids_first = gf.read_mm_ids(sheet_1, cell2)
         arr_diagrams_first = create_arr_diagrams(arr_ids_first)
 
         mass = [[0] * len(arr_diagrams) for i in range(len(arr_diagrams_first))]

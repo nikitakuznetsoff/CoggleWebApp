@@ -1,0 +1,99 @@
+<!doctype html>
+<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
+<title>Анализ интеллект карт</title>
+
+<style type="text/css">
+   body {
+        margin-left: 15%;
+        margin-right: 15%;
+        font-family: "Source Sans Pro";
+   }
+    #submit {
+        width: 200px;
+        height: 40px;
+        font-size: 16px;
+    }
+    .error {
+        color: red;
+        font-size: small;
+    }
+</style>
+<body>
+    <label style="text-align:center"><h1>Анализ интеллект карт</h1></label>
+    <form method=post enctype=multipart/form-data>
+        <p><label><h2>Форма сравнения</h2></label></p>
+        <p>
+            <input type=radio id="contactChoice1" name="form_algo" value="with_true" checked>
+            <label for="contactChoice1">Сравнение правильных интеллект-карт с работами студентов</label>
+        </p>
+        <p>
+            <input type=radio id="contactChoice2" name="form_algo" value="without_true">
+            <label for="contactChoice2">Сравнение работ студентов</label>
+        </p>
+        <p><label><h2>Загрузка файлов</h2></label></p>
+        <p><label for="file">Загрузка файла с правильными картами</label></p>
+        {% with inputs = get_flashed_messages(category_filter=["input"]) %}
+            {% if inputs %}
+            <p><span class="error">Ошибка! Вы не выбрали файл для загрузки</span></p>
+            {% endif %}
+        {% endwith %}
+        <p><input type=file accept=".xls,.xlsx" name=file_input></p>
+
+        <p><label for="file">Загрузка файла с картами студентов</label></p>
+        {% with inputs = get_flashed_messages(category_filter=["input_ref"]) %}
+            {% if inputs %}
+            <p><span class="error">Ошибка! Вы не выбрали файл для загрузки</span></p>
+            {% endif %}
+        {% endwith %}
+        <p><input type=file accept=".xls,.xlsx" name=file_input_ref></p>
+
+        <p><label><h2>Информация для чтения данных</h2></label></p>
+        <p><label>Введите название таблицы, в которой находятся правильные интеллект-карты</label></p>
+        <p><label><font size="2">(если информация находится в первой таблице файла, то оставьте поле пустым)</font></label></p>
+        {% with inputs = get_flashed_messages(category_filter=["inf_for_read1"]) %}
+            {% if inputs %}
+            <p><span class="error">Ошибка! В файле нет таблицы с таким названием!</span></p>
+            {% endif %}
+        {% endwith %}
+        <p><input name="inf_for_read1"></p>
+
+        <p><label>Введите название таблицы, в которой находятся интеллект-карты обучаемых</label></p>
+        <p><label><font size="2">(если информация находится в первой таблице файла, то оставьте поле пустым)</font></label></p>
+        {% with inputs = get_flashed_messages(category_filter=["inf_for_read2"]) %}
+            {% if inputs %}
+            <p><span class="error">Ошибка! В файле нет таблицы с таким названием!</span></p>
+            {% endif %}
+        {% endwith %}
+        <p><input name="inf_for_read2"></p>
+
+        <label><strong>Ячейки для начала считывания</strong></label>
+        <p><label>Для таблицы с правильными
+            <font size="2">(Напр. "A1" или "C7". Если поле пустое, то считывание с "B2")</font></label></p>
+        {% with inputs = get_flashed_messages(category_filter=["cell_for_read1"]) %}
+            {% if inputs %}
+            <p><span class="error">Ошибка! Вы ввели ячеку некорректного формата!</span></p>
+            {% endif %}
+        {% endwith %}
+        {% with inputs = get_flashed_messages(category_filter=["cell_for_read1_form"]) %}
+            {% if inputs %}
+            <p><span class="error">Ошибка! Вы ввели ячеку некорректного формата!</span></p>
+            {% endif %}
+        {% endwith %}
+        <p><input name="cell_for_read1"></p>
+
+        <p><label>Для таблицы с студенческими
+            <font size="2">(Напр. "A1" или "C7". Если поле пустое, то считывание с "B2")</font></label></p>
+        {% with inputs = get_flashed_messages(category_filter=["cell_for_read2"]) %}
+            {% if inputs %}
+            <p><span class="error">Ошибка! Отсутствуют входные данные!</span></p>
+            {% endif %}
+        {% endwith %}
+        {% with inputs = get_flashed_messages(category_filter=["cell_for_read2_form"]) %}
+            {% if inputs %}
+            <p><span class="error">Ошибка! Отсутствуют входные данные!</span></p>
+            {% endif %}
+        {% endwith %}
+        <p><input name="cell_for_read2"></p>
+        <p><center><input type="submit" id="submit" value="Отправить данные"></center></p>
+    </form>
+</body>
